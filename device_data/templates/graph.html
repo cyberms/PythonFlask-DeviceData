@@ -1,17 +1,95 @@
-<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
-<script type="text/javascript" charset="utf-8">
-  $(document).ready(function() {
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-    // listen for mqtt_message events
-    // when a new message is received, log and append the data to the page
-    socket.on('mqtt_message', function(data) {
-      console.log(data);
-      var text = '(' + data['topic'] + ' qos: ' + data['qos'] + ') ' + data['payload'];
-      $('#subscribe_messages').append(text + '<br><br>');
-    })
-  });
-</script>
+<!doctype html>
+<html>
+  <head>
+    <title>Device Pressure Dashboard</title>
+    <link rel='stylesheet' href="{{ url_for('static', filename='css/bulma.min.css')}}">
+    <link rel='stylesheet' href="{{ url_for('static', filename='css/app.css')}}">
+    <link rel='stylesheet' href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+    <style>
+      .red {
+        /* background-color: black; */
+        color: rgb(248, 94, 94);
+        font-size: 30px;
+        font-weight: 700;
+      }
+      .green {
+        /* background-color: black; */
+        color: rgb(99, 201, 99);
+        font-size: 30px;
+        font-weight: 700;
+      }
+      </style>
+  </head>
+  <body>
+    <div class="container top">
+      <div class="content">
+        <div id="subscribe_messages"></div>
+      </div>
+    </div>
+  </body>
+  
+  <script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+  <script type="text/javascript" charset="utf-8">
+    $(document).ready(function() {
+      var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-<div id="subscribe_messages"></div>
+      // listen for mqtt_message events
+      // when a new message is received, log and append the data to the page
+      socket.on('mqtt_message', function(data) {
+        console.log('Received data');
+        console.log(data);
+        //var text = '(' + data['topic'] + ') ' + ' Pressure: ' + data['pressure_reading'] + 'psi' + '. Datetime: ' + data['datetime'] ;
+        
+        var html = '<div class="card adjust-height">';
+        html+= '<header class="card-header">';
+        html+=  '<p class="card-header-title">';
+        line= 'DevEUI: '+data['device']
+        html+= line
+        html+=  '</p>';
+        html+= '</header>'
+        html+= '<div class="card-content">'
+        html+=  '<div class="content">';
+        line= 'Datetime: ' + data['datetime'] + '<br>';
+        html+=  line
+        line= 'Pressure: '
+        if (data['pressure_reading'] < 60 || data['pressure_reading'] > 70){
+          // Paint it red 
+          line+= '<span class="red">';
+        } else{
+          // Paint it green 
+          line+= '<span class="green">';
+        }
+
+        line+= data['pressure_reading'];
+        line+= '</span>';
+
+        line+= ' psi <br>';
+        html+=  line
+        html+=  '</div>';
+        html+=  '</div>';
+        html+=  '</div>';
+
+        $('#subscribe_messages').prepend(html + '<br><br>');
+
+      })
+    });
+  </script>
+
+</html>
+
+
+
+
+<!--  <div class="columns">
+    <div class="column">
+      <h1>Pressure readings</h1>
+    </div>
+    <div class="column is-one-fifth">
+    </div>
+  </div>
+  
+  <div class="columns is-multiline" id="subscribe_messages"></div>
+
+  </div>-->
