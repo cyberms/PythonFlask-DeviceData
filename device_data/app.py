@@ -29,10 +29,13 @@ def handle_mqtt_message(client, userdata, message):
 
     json_event= json.loads(message.payload.decode())
 
+    # print("data {0}".format(json_event.get('data')))
+
     if json_event.get('data') == 'ZGV2aWNlTm90SGE=':
-        pressure_reading = randint(60, 80)
+        pressure_reading = randint(60, 70)
     else:
-        pressure_reading = base64.b64decode(json_event.get('data'))
+        pressure_reading = int(base64.b64decode(json_event.get('data')))
+        print("Pressure reading: {0}".format(pressure_reading))
         #pressure_reading = randint(60, 80)
 
     data = dict(
